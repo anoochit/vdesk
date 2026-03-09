@@ -1,82 +1,77 @@
-# vdesk: Virtual Agent Office
+# vdesk: Virtual Agent Office - Project Context
 
-`vdesk` is an experimental project that visualizes AI agents in a virtual, retro-styled office environment. It consists of a Python-based agent runner and an Astro-powered web interface, synchronized via MQTT.
+`vdesk` is an experimental simulation that visualizes AI agents in a virtual, retro-styled office environment. It bridges the gap between agentic logic and visual UI by using real-time synchronization via MQTT.
 
 ## Project Overview
 
-The project is split into two main components:
-
-1. **`vdesk-agents`**: A Python backend that defines and runs LLM agents using the Google Agent Developer Kit (ADK). These agents communicate their internal states (thinking, acting, idling) to a public MQTT broker.
-2. **`vdesk-web`**: A web application built with Astro and NES.css. It provides a 16-bit visual representation of the office, subscribing to MQTT events to animate agent sprites and display status bubbles in real-time.
+The project consists of two primary components:
+1.  **`vdesk-agents`**: A Python backend using the [Google Agent Developer Kit (ADK)](https://github.com/google/agent-developer-kit). It defines specialized agents (Manager, Dev, Ops) that perform tasks and report their internal states (thinking, acting, idling).
+2.  **`vdesk-web`**: An Astro-powered frontend styled with [NES.css](https://nostalgic-css.github.io/NES.css/). It provides a 16-bit visual representation of the office floor, where agent sprites react to MQTT events.
 
 ### Architecture
-
-- **Agent Backend**: Python 3.13+, `google-adk`, `paho-mqtt`.
-- **Web Frontend**: Astro 5+, NES.css (retro styling), `mqtt.js`.
+- **Language**: Python 3.13+ (Backend), TypeScript/Astro (Frontend).
+- **Orchestration**: Google ADK for agent logic and delegation.
 - **Communication**: MQTT via `broker.emqx.io` (Public Broker).
-  - Topic Pattern: `voffice/agents/{agent_id}/events`
+    - **Topic**: `voffice/agents/{agent_id}/events`
+- **Frontend UI**: Astro 5+, NES.css, MQTT.js.
 
 ---
 
-## vdesk-agents (Python Backend)
+## Component Details
 
-This directory contains the logic for the AI agents.
+### 1. vdesk-agents (Python Backend)
+The backend defines the following agents:
+- **Manager (`mgr_agent`)**: The orchestrator. Delegating tasks to Dev and Ops.
+- **Dev (`dev_agent`)**: Specializes in coding (C/Assembly).
+- **Ops (`ops_agent`)**: Handles calculations and server status checks.
 
-### Key Files
+**Key Tools:**
+- `calculator`: Basic math evaluation.
+- `check_server_status`: Returns mock mainframe metrics.
 
-- `agent_office.py`: The main entry point for the agent simulation. It defines `dev_agent`, sets up MQTT callbacks, and runs demo tasks.
-- `requirements.txt`: Python dependencies (`google-adk`, `paho-mqtt`, `python-dotenv`).
+**Building and Running:**
+- **Prerequisites**: Python 3.13, `uv` (recommended).
+- **Install Dependencies**: `uv sync` or `pip install -r requirements.txt`.
+- **Run Agents**: `python agent_office.py`.
+- **Configuration**: Requires `GOOGLE_API_KEY` in a `.env` file.
 
-### Building and Running
+### 2. vdesk-web (Astro Frontend)
+The frontend maps `agent_id` from MQTT events to UI components.
 
-1. **Set up environment**:
-
-    ```bash
-    cd vdesk-agents
-    python -m venv .venv
-    source .venv/bin/activate  # Or .venv\Scripts\activate on Windows
-    pip install -r requirements.txt
-    ```
-
-2. **Run the agents**:
-
-    ```bash
-    python agent_office.py
-    ```
-
----
-
-## vdesk-web (Astro Frontend)
-
-This directory contains the visual representation of the office.
-
-### Key Files
-
-- `src/pages/index.astro`: Defines the office layout, pixel grid, and desk positions.
-- `src/components/Officer.astro`: A reusable component for each agent. It handles MQTT subscription and updates the UI based on events.
-- `astro.config.mjs`: Astro configuration.
-
-### Building and Running
-
-1. **Install dependencies**:
-
-    ```bash
-    cd vdesk-web
-    npm install
-    ```
-
-2. **Start development server**:
-
-    ```bash
-    npm run dev
-    ```
-
-    The office will be available at `http://localhost:4321`.
+**Building and Running:**
+- **Install Dependencies**: `npm install`.
+- **Start Dev Server**: `npm run dev`.
+- **Build**: `npm run build`.
 
 ---
 
 ## Development Conventions
 
-- **MQTT Sync**: If you add a new agent to `vdesk-agents`, ensure its `agent_id` matches the `agentId` prop passed to the `Officer` component in `index.astro`.
-- **Styling**: Use [NES.css](https://nostalgic-css.github.io/NES.css/) classes (e.g., `nes-container`, `nes-balloon`) to maintain the retro aesthetic.
-- **Callbacks**: The Python agents use ADK callbacks (`before_model_callback`, `after_agent_callback`, `before_tool_callback`) to trigger MQTT events.
+### MQTT Sync
+To add a new agent, ensure consistency across both layers:
+1.  **Backend**: Define the agent in `agent_office.py` with a unique name (e.g., `sales_agent`).
+2.  **Frontend**: Add the agent to the `agents` array in `src/pages/index.astro` with a matching `agentId`.
+
+### Coding Style
+- **Python**: Use ADK callbacks (`before_model`, `after_agent`, `before_tool`) to trigger MQTT events.
+- **Astro**: Use the `Officer.astro` component for agent visualization. It handles MQTT connections via WebSocket (`wss://broker.emqx.io:8084/mqtt`).
+- **Styling**: Adhere to the NES.css retro aesthetic for all UI elements.
+
+### Topic Pattern
+`voffice/agents/{agent_id}/events`
+**Payload Example:**
+```json
+{
+  "agent_id": "mgr_agent",
+  "status": "thinking",
+  "message": "Wait... I'm thinking...",
+  "timestamp": 1741512345.678
+}
+```
+
+---
+
+## TODO / Roadmap
+- [ ] Implement persistent storage for agent memory using ADK session services.
+- [ ] Add more "Office Furniture" components (e.g., Coffee Machine, Server Rack) that agents can interact with.
+- [ ] Enhance MQTT security (currently using a public broker).
