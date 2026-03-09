@@ -1,8 +1,31 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Officer from '../components/Officer.astro';
----
 
+const agents = [
+	{ "agentId" : "dev_agent", "name" : "Developer", "initialEmoji": "👨‍💻" },
+	{ "agentId" : "ops_agent", "name" : "Operations", "initialEmoji": "⚙️" },
+	{ "agentId" : "mgr_agent", "name" : "Manager", "initialEmoji": "👔" }
+]
+
+// Auto-layout: arrange agents in a grid based on count
+const DESK_W = 80;
+const DESK_H = 40;
+const COL_GAP = 200;
+const ROW_GAP = 200;
+const OFFSET_X = 100;
+const OFFSET_Y = 150;
+const COLS = Math.ceil(Math.sqrt(agents.length));
+
+function getPos(i: number) {
+	const col = i % COLS;
+	const row = Math.floor(i / COLS);
+	return {
+		x: OFFSET_X + col * COL_GAP,
+		y: OFFSET_Y + row * ROW_GAP,
+	};
+}
+---
 <Layout title="16-bit Virtual Agent Office">
 	<main>
 		<header class="office-header">
@@ -12,16 +35,22 @@ import Officer from '../components/Officer.astro';
 
 		<section class="office-floor">
 			<div class="pixel-grid"></div>
-			
-			<!-- Office Furniture (Retro look) -->
-			<div class="desk" style="left: 150px; top: 150px;"></div>
-			<div class="desk" style="left: 450px; top: 150px;"></div>
-			<div class="desk" style="left: 300px; top: 350px;"></div>
 
-			<!-- Agents -->
-			<Officer agentId="dev_agent" name="Developer" x={150} y={100} initialEmoji="👨‍💻" />
-			<Officer agentId="ops_agent" name="Operations" x={450} y={100} initialEmoji="⚙️" />
-			<Officer agentId="mgr_agent" name="Manager" x={300} y={300} initialEmoji="👔" />
+			{agents.map((agent, i) => {
+				const { x, y } = getPos(i);
+				return (
+					<>
+						<div class="desk" style={`left: ${x}px; top: ${y}px;`}></div>
+						<Officer
+							agentId={agent.agentId}
+							name={agent.name}
+							x={x}
+							y={y - 50}
+							initialEmoji={agent.initialEmoji}
+						/>
+					</>
+				);
+			})}
 		</section>
 
 		<footer class="office-footer">

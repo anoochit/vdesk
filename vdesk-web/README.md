@@ -1,43 +1,58 @@
-# Astro Starter Kit: Minimal
+# vdesk-web: The Virtual Agent Office
 
-```sh
-npm create astro@latest -- --template minimal
-```
+`vdesk-web` is the visual frontend for the **vdesk** project, an experimental office simulator that visualizes AI agents in a 16-bit, retro-styled environment.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## 🚀 Overview
 
-## 🚀 Project Structure
+Built with **Astro** and styled with **NES.css**, this web application provides a real-time view of agents working at their desks. It synchronizes with the Python agent backend via **MQTT**, allowing the UI to animate sprites and display "thinking" bubbles as agents perform tasks.
 
-Inside of your Astro project, you'll see the following folders and files:
+### Features
+- **Retro Aesthetic**: 16-bit pixel art style using [NES.css](https://nostalgic-css.github.io/NES.css/).
+- **Real-time Synchronization**: Subscribes to MQTT events (using `mqtt.js`) to reflect agent states (thinking, acting, idling).
+- **Responsive Grid**: A pixel-perfect office layout with dynamic agent components.
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+## 🛠️ Tech Stack
+- **Framework**: [Astro 5+](https://astro.build/)
+- **Styling**: [NES.css](https://nostalgic-css.github.io/NES.css/)
+- **Communication**: [MQTT.js](https://github.com/mqttjs/MQTT.js) via `broker.emqx.io`
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## 🏁 Getting Started
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+### Prerequisites
+- [Node.js](https://nodejs.org/) (v18 or higher recommended)
+- [npm](https://www.npmjs.com/)
 
-Any static assets, like images, can be placed in the `public/` directory.
+### Installation
 
-## 🧞 Commands
+1.  Navigate to the web directory:
+    ```bash
+    cd vdesk-web
+    ```
 
-All commands are run from the root of the project, from a terminal:
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+3.  Start the development server:
+    ```bash
+    npm run dev
+    ```
 
-## 👀 Want to learn more?
+The office will be available at `http://localhost:4321`.
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+## 📂 Project Structure
+
+- `src/pages/index.astro`: Main office layout, grid definition, and desk placement.
+- `src/components/Officer.astro`: Reusable agent component. Handles MQTT subscriptions and state-based animations.
+- `public/`: Static assets and icons.
+
+## 🔌 MQTT Integration
+
+The UI listens for events on the following topic pattern:
+`voffice/agents/{agent_id}/events`
+
+Ensure that the `agentId` prop passed to the `Officer` component in `index.astro` matches the `agent_id` configured in the Python backend.
+
+---
+Part of the [vdesk](https://github.com/your-repo/vdesk) project.
