@@ -1,0 +1,42 @@
+---
+import "nes.css/css/nes.min.css";
+import "@fontsource/press-start-2p";
+
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content="16-bit Virtual Agent Office" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+	<body class="is-dark">
+		<slot />
+	</body>
+</html>
+<style is:global>
+	:root {
+		--pixel-size: 4px;
+	}
+	html, body {
+		margin: 0;
+		padding: 0;
+		height: 100%;
+		background-color: #212529;
+		color: white;
+		font-family: "Press Start 2P", system-ui;
+		overflow: hidden;
+	}
+	.pixelated {
+		image-rendering: pixelated;
+	}
+</style>

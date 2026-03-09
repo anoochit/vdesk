@@ -1,0 +1,17 @@
+{
+  "name": "vdesk-web",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@fontsource/press-start-2p": "^5.2.7",
+    "astro": "^5.17.1",
+    "mqtt": "^5.15.0",
+    "nes.css": "^2.2.1"
+  }
+}

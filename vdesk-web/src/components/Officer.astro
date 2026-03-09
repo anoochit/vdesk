@@ -1,0 +1,151 @@
+---
+interface Props {
+  agentId: string;
+  name: string;
+  x: number;
+  y: number;
+  initialEmoji?: string;
+}
+
+const { agentId, name, x, y, initialEmoji = "🤖" } = Astro.props;
+---
+
+<div class="officer" id={`officer-${agentId}`} style={`left: ${x}px; top: ${y}px;`}>
+  <div class="bubble-container">
+    <div class="nes-balloon from-left is-dark status-bubble hidden" id={`bubble-${agentId}`}>
+      <p class="message-text" id={`text-${agentId}`}>Ready.</p>
+    </div>
+  </div>
+  
+  <div class="sprite-container">
+    <div class="nes-container is-rounded is-dark sprite-box">
+      <span class="agent-emoji" id={`emoji-${agentId}`}>{initialEmoji}</span>
+    </div>
+    <div class="status-indicator hidden" id={`status-${agentId}`}>
+      <i class="nes-icon is-small heart"></i>
+    </div>
+  </div>
+
+  <span class="nes-badge name-tag">
+    <span class="is-primary">{name}</span>
+  </span>
+</div>
+
+<script>
+  import mqtt from 'mqtt';
+
+  const officerElements = document.querySelectorAll('.officer');
+  
+  officerElements.forEach((el) => {
+    const agentId = el.id.replace('officer-', '');
+    const bubble = document.getElementById(`bubble-${agentId}`);
+    const textEl = document.getElementById(`text-${agentId}`);
+    const statusInd = document.getElementById(`status-${agentId}`);
+    const emojiEl = document.getElementById(`emoji-${agentId}`);
+
+    // Connect to public broker via WebSocket
+    const client = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
+
+    client.on('connect', () => {
+      console.log(`Connected MQTT: ${agentId}`);
+      client.subscribe(`voffice/agents/${agentId}/events`);
+    });
+
+    client.on('message', (topic, message) => {
+      const data = JSON.parse(message.toString());
+      
+      if (textEl && bubble) {
+        textEl.textContent = data.message;
+        bubble.classList.remove('hidden');
+        
+        // Auto-hide bubble after 5 seconds if not "thinking"
+        if (data.status !== 'thinking') {
+          setTimeout(() => {
+            // Only hide if the message hasn't changed
+            if (textEl.textContent === data.message) {
+              bubble.classList.add('hidden');
+            }
+          }, 5000);
+        }
+      }
+
+      if (statusInd) {
+        if (data.status === 'thinking') {
+          statusInd.classList.remove('hidden');
+          el.classList.add('thinking-anim');
+        } else {
+          statusInd.classList.add('hidden');
+          el.classList.remove('thinking-anim');
+        }
+      }
+    });
+  });
+</script>
+
+<style>
+  .officer {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: all 0.5s ease-in-out;
+    width: 120px;
+  }
+
+  .sprite-container {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .sprite-box {
+    padding: 10px !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #333 !important;
+  }
+
+  .agent-emoji {
+    font-size: 2rem;
+  }
+
+  .bubble-container {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    width: 250px;
+    z-index: 10;
+    color: black;
+  }
+
+  .status-bubble {
+    padding: 0.5rem !important;
+    font-size: 8px;
+    line-height: 1.2;
+  }
+
+  .name-tag {
+    margin-top: 8px;
+    transform: scale(0.8);
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .status-indicator {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+
+  .thinking-anim .sprite-box {
+    animation: bounce 0.5s infinite;
+    border-color: #209cee !important;
+  }
+</style>
