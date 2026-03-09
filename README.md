@@ -25,9 +25,9 @@ Navigate to the `vdesk-agents` directory and follow the instructions in its [REA
 ```bash
 cd vdesk-agents
 # Set up venv and install dependencies
-python -m venv .venv
+uv venv
 source .venv/bin/activate
-pip install -r requirements.txt
+uv sync
 # Run the agents
 python agent_office.py
 ```
