@@ -1,12 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Officer from '../components/Officer.astro';
-
-const agents = [
-	{ "agentId" : "dev_agent", "name" : "Developer", "initialEmoji": "👨‍💻" },
-	{ "agentId" : "ops_agent", "name" : "Operations", "initialEmoji": "⚙️" },
-	{ "agentId" : "mgr_agent", "name" : "Manager", "initialEmoji": "👔" }
-]
+import { agents } from '../config/agents';
 
 // Auto-layout: arrange agents in a grid based on count
 const DESK_W = 80;
