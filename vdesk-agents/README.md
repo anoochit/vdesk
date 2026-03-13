@@ -59,7 +59,7 @@ The backend simulates a virtual 16-bit office environment with three specialized
 Run the main script to start the agent simulation and demo tasks:
 
 ```bash
-python agent_office.py
+python main.py
 ```
 
 The script will:

@@ -26,10 +26,10 @@ Navigate to the `vdesk-agents` directory and follow the instructions in its [REA
 cd vdesk-agents
 # Set up venv and install dependencies
 uv venv
-source .venv/bin/activate
+source .venv/bin/activate # or .venv\Scripts\activate on Windows
 uv sync
 # Run the agents
-python agent_office.py
+python main.py
 ```
 
 ### 2. Start the Web Interface
