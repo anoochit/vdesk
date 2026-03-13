@@ -33,6 +33,7 @@ const { agentId, name, x, y, initialEmoji = "🤖" } = Astro.props;
 
 <script>
   import mqtt from 'mqtt';
+import { MQTT_BROKER_URL } from '../config/agents';
 
   const officerElements = document.querySelectorAll('.officer');
   
@@ -44,7 +45,7 @@ const { agentId, name, x, y, initialEmoji = "🤖" } = Astro.props;
     const emojiEl = document.getElementById(`emoji-${agentId}`);
 
     // Connect to public broker via WebSocket
-    const client = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
+    const client = mqtt.connect(MQTT_BROKER_URL);
 
     client.on('connect', () => {
       console.log(`Connected MQTT: ${agentId}`);
