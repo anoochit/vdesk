@@ -10,7 +10,7 @@ const COL_GAP = 200;
 const ROW_GAP = 200;
 const OFFSET_X = 100;
 const OFFSET_Y = 150;
-const COLS = Math.ceil(Math.sqrt(agents.length));
+const COLS = Math.ceil(Math.sqrt(30));
 
 function getPos(i: number) {
 	const col = i % COLS;
@@ -23,10 +23,10 @@ function getPos(i: number) {
 ---
 <Layout title="16-bit Virtual Agent Office">
 	<main>
-		<header class="office-header">
+		<!-- <header class="office-header">
 			<h1 class="nes-text is-primary">VIRTUAL OFFICE v1.0</h1>
 			<p class="nes-text is-disabled">Real-time ADK Agent Monitor</p>
-		</header>
+		</header> -->
 
 		<section class="office-floor">
 			<div class="pixel-grid"></div>
@@ -39,8 +39,8 @@ function getPos(i: number) {
 						<Officer
 							agentId={agent.agentId}
 							name={agent.name}
-							x={x}
-							y={y - 50}
+							x={x-20}
+							y={y - 60}
 							initialEmoji={agent.initialEmoji}
 						/>
 					</>
@@ -48,12 +48,12 @@ function getPos(i: number) {
 			})}
 		</section>
 
-		<footer class="office-footer">
+		<!-- <footer class="office-footer">
 			<div class="nes-container is-dark with-title">
 				<p class="title">System Logs</p>
 				<p id="system-status">Broker: Connected to emqx.io</p>
 			</div>
-		</footer>
+		</footer> -->
 	</main>
 </Layout>
 

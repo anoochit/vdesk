@@ -18,9 +18,9 @@ const { agentId, name, x, y, initialEmoji = "🤖" } = Astro.props;
   </div>
   
   <div class="sprite-container">
-    <div class="nes-container is-rounded is-dark sprite-box">
+    
       <span class="agent-emoji" id={`emoji-${agentId}`}>{initialEmoji}</span>
-    </div>
+    
     <div class="status-indicator hidden" id={`status-${agentId}`}>
       <i class="nes-icon is-small heart"></i>
     </div>
@@ -106,13 +106,13 @@ const { agentId, name, x, y, initialEmoji = "🤖" } = Astro.props;
   }
 
   .agent-emoji {
-    font-size: 2rem;
+    font-size: 3.5rem;
   }
 
   .bubble-container {
     position: absolute;
-    bottom: 100%;
-    left: 50%;
+    bottom: 80%;
+    left: 25%;
     width: 250px;
     z-index: 10;
     color: black;
@@ -135,8 +135,8 @@ const { agentId, name, x, y, initialEmoji = "🤖" } = Astro.props;
 
   .status-indicator {
     position: absolute;
-    top: -10px;
-    right: -10px;
+    top: 10px;
+    right: 10px;
   }
 
   @keyframes bounce {

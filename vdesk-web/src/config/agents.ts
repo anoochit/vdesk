@@ -6,6 +6,6 @@ export interface Agent {
 
 export const agents: Agent[] = [
 	{ "agentId" : "dev_agent", "name" : "Developer", "initialEmoji": "👨‍💻" },
-	{ "agentId" : "ops_agent", "name" : "Operations", "initialEmoji": "⚙️" },
-	{ "agentId" : "mgr_agent", "name" : "Manager", "initialEmoji": "👔" }
+	{ "agentId" : "ops_agent", "name" : "Operations", "initialEmoji": "👨‍💻" },
+	{ "agentId" : "mgr_agent", "name" : "Manager", "initialEmoji": "👨‍💻" }
 ];
