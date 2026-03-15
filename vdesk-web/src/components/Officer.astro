@@ -10,7 +10,7 @@ interface Props {
 const { agentId, name, sprite, initialX, initialY } = Astro.props;
 ---
 
-<div class="officer" id={`officer-${agentId}`} style={`left: ${initialX}px; top: ${initialY}px; z-index: ${Math.floor(initialY / 32)};`} data-home-x={initialX} data-home-y={initialY}>
+<div class="officer" id={`officer-${agentId}`} style={`left: ${initialX}px; top: ${initialY}px; z-index: ${Math.floor(initialY)};`} data-home-x={initialX} data-home-y={initialY}>
   <div class="bubble-container">
     <div class="nes-balloon from-left is-dark status-bubble hidden" id={`bubble-${agentId}`}>
       <p class="message-text" id={`text-${agentId}`}>Ready.</p>
@@ -38,6 +38,7 @@ const { agentId, name, sprite, initialX, initialY } = Astro.props;
 <script>
   import mqtt from 'mqtt';
   import { MQTT_BROKER_URL } from '../config/agents';
+  import { findPath } from '../utils/pathfinding';
 
   // Constants matching the map
   const TILE_SIZE = 32;
@@ -99,47 +100,68 @@ const { agentId, name, sprite, initialX, initialY } = Astro.props;
         const currentLeft = parseFloat(comp.left || '0');
         const currentTop = parseFloat(comp.top || '0');
 
-        // Interrupt current transition
-        officerEl.style.transition = 'none';
-        officerEl.style.left = `${currentLeft}px`;
-        officerEl.style.top = `${currentTop}px`;
-        void officerEl.offsetWidth; // force reflow
+        const path = findPath(currentLeft, currentTop, targetX, targetY);
+        let pathIndex = 0;
 
-        const dx = targetX - currentLeft;
-        const dy = targetY - currentTop;
-
-        if (Math.abs(dx) > Math.abs(dy)) {
-            currentDir = ROW_SIDE;
-            currentMirror = dx < 0;
-        } else {
-            currentDir = dy > 0 ? ROW_FRONT : ROW_BACK;
-            currentMirror = false;
-        }
-
-        const dist = Math.hypot(dx, dy);
-        if (dist < 5) {
-            isMoving = false;
-            officerEl.style.left = `${targetX}px`;
-            officerEl.style.top = `${targetY}px`;
-            officerEl.style.zIndex = Math.floor(targetY / TILE_SIZE).toString();
-            if (onComplete) onComplete();
-            return;
-        }
-
-        const speed = 80; // pixels per second
-        const duration = dist / speed;
-
-        officerEl.style.transition = `left ${duration}s linear, top ${duration}s linear`;
-        officerEl.style.left = `${targetX}px`;
-        officerEl.style.top = `${targetY}px`;
-        officerEl.style.zIndex = Math.floor(targetY / TILE_SIZE).toString();
-
-        setTimeout(() => {
-            if (currentWalkId === walkId) {
+        function walkNextSegment() {
+            if (currentWalkId !== walkId) return; // Interrupted
+            
+            if (pathIndex >= path.length) {
                 isMoving = false;
                 if (onComplete) onComplete();
+                return;
             }
-        }, duration * 1000);
+
+            const nextTarget = path[pathIndex];
+            pathIndex++;
+
+            const currComp = window.getComputedStyle(officerEl);
+            const currLeft = parseFloat(currComp.left || '0');
+            const currTop = parseFloat(currComp.top || '0');
+
+            // Interrupt current transition
+            officerEl.style.transition = 'none';
+            officerEl.style.left = `${currLeft}px`;
+            officerEl.style.top = `${currTop}px`;
+            void officerEl.offsetWidth; // force reflow
+
+            const dx = nextTarget.x - currLeft;
+            const dy = nextTarget.y - currTop;
+
+            if (Math.abs(dx) > Math.abs(dy)) {
+                currentDir = ROW_SIDE;
+                currentMirror = dx < 0;
+            } else {
+                currentDir = dy > 0 ? ROW_FRONT : ROW_BACK;
+                currentMirror = false;
+            }
+
+            const dist = Math.hypot(dx, dy);
+            if (dist < 2) {
+                // Basically there, skip to next
+                officerEl.style.left = `${nextTarget.x}px`;
+                officerEl.style.top = `${nextTarget.y}px`;
+                officerEl.style.zIndex = Math.floor(nextTarget.y).toString();
+                walkNextSegment();
+                return;
+            }
+
+            const speed = 80; // pixels per second
+            const duration = dist / speed;
+
+            officerEl.style.transition = `left ${duration}s linear, top ${duration}s linear`;
+            officerEl.style.left = `${nextTarget.x}px`;
+            officerEl.style.top = `${nextTarget.y}px`;
+            officerEl.style.zIndex = Math.floor(nextTarget.y).toString();
+
+            setTimeout(() => {
+                if (currentWalkId === walkId) {
+                    walkNextSegment();
+                }
+            }, duration * 1000);
+        }
+
+        walkNextSegment();
     }
 
     function goHome() {

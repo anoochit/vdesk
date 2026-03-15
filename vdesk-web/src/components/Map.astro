@@ -1,5 +1,5 @@
 ---
-import layoutData from '../../public/assets/default-layout-1.json';
+import layoutData from '../assets/default-layout-1.json';
 
 const { cols, rows, tiles, furniture } = layoutData;
 export const TILE_SIZE = 32; // Map scale, 1 tile = 32x32 pixels on screen
@@ -80,7 +80,7 @@ function getFurnitureImage(typeStr: string) {
     // we use a CSS trick: the image itself contains the size. 
     // Actually, setting zoom: 2 works in many browsers, but transform scale is better.
     return (
-      <div class="furniture" style={`left: ${item.col * TILE_SIZE}px; top: ${item.row * TILE_SIZE}px; position: absolute; z-index: ${Math.floor(item.row)};`}>
+      <div class="furniture" style={`left: ${item.col * TILE_SIZE}px; top: ${item.row * TILE_SIZE}px; position: absolute; z-index: ${Math.floor(item.row * TILE_SIZE + 64)};`}>
         <img src={src} class="furniture-img" style={`transform: ${isMirrored ? 'scaleX(-2) scaleY(2)' : 'scale(2)'}; transform-origin: top left; image-rendering: pixelated;`} onerror="this.style.display='none'" />
       </div>
     );

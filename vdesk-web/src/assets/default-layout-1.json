@@ -1861,12 +1861,6 @@
       "row": 2
     },
     {
-      "uid": "seat-chair-2",
-      "type": "WOODEN_CHAIR_BACK",
-      "col": 4,
-      "row": 3.2
-    },
-    {
       "uid": "seat-desk-3",
       "type": "DESK_FRONT",
       "col": 9,
@@ -1877,12 +1871,6 @@
       "type": "PC_FRONT_OFF",
       "col": 10,
       "row": 2
-    },
-    {
-      "uid": "seat-chair-5",
-      "type": "WOODEN_CHAIR_BACK",
-      "col": 10,
-      "row": 3.2
     },
     {
       "uid": "seat-desk-6",
@@ -1897,12 +1885,6 @@
       "row": 2
     },
     {
-      "uid": "seat-chair-8",
-      "type": "WOODEN_CHAIR_BACK",
-      "col": 16,
-      "row": 3.2
-    },
-    {
       "uid": "seat-desk-9",
       "type": "DESK_FRONT",
       "col": 3,
@@ -1913,12 +1895,6 @@
       "type": "PC_FRONT_OFF",
       "col": 4,
       "row": 6
-    },
-    {
-      "uid": "seat-chair-11",
-      "type": "WOODEN_CHAIR_BACK",
-      "col": 4,
-      "row": 7.2
     },
     {
       "uid": "seat-desk-12",
@@ -1933,12 +1909,6 @@
       "row": 6
     },
     {
-      "uid": "seat-chair-14",
-      "type": "WOODEN_CHAIR_BACK",
-      "col": 10,
-      "row": 7.2
-    },
-    {
       "uid": "seat-desk-15",
       "type": "DESK_FRONT",
       "col": 15,
@@ -1949,12 +1919,6 @@
       "type": "PC_FRONT_OFF",
       "col": 16,
       "row": 6
-    },
-    {
-      "uid": "seat-chair-17",
-      "type": "WOODEN_CHAIR_BACK",
-      "col": 16,
-      "row": 7.2
     },
     {
       "uid": "seat-desk-18",
@@ -1969,12 +1933,6 @@
       "row": 14
     },
     {
-      "uid": "seat-chair-20",
-      "type": "WOODEN_CHAIR_BACK",
-      "col": 4,
-      "row": 15.2
-    },
-    {
       "uid": "seat-desk-21",
       "type": "DESK_FRONT",
       "col": 9,
@@ -1985,12 +1943,6 @@
       "type": "PC_FRONT_OFF",
       "col": 10,
       "row": 14
-    },
-    {
-      "uid": "seat-chair-23",
-      "type": "WOODEN_CHAIR_BACK",
-      "col": 10,
-      "row": 15.2
     },
     {
       "uid": "seat-desk-24",
@@ -2005,12 +1957,6 @@
       "row": 14
     },
     {
-      "uid": "seat-chair-26",
-      "type": "WOODEN_CHAIR_BACK",
-      "col": 16,
-      "row": 15.2
-    },
-    {
       "uid": "seat-desk-27",
       "type": "DESK_FRONT",
       "col": 3,
@@ -2021,12 +1967,6 @@
       "type": "PC_FRONT_OFF",
       "col": 4,
       "row": 18
-    },
-    {
-      "uid": "seat-chair-29",
-      "type": "WOODEN_CHAIR_BACK",
-      "col": 4,
-      "row": 19.2
     },
     {
       "uid": "seat-desk-30",
@@ -2041,12 +1981,6 @@
       "row": 18
     },
     {
-      "uid": "seat-chair-32",
-      "type": "WOODEN_CHAIR_BACK",
-      "col": 10,
-      "row": 19.2
-    },
-    {
       "uid": "seat-desk-33",
       "type": "DESK_FRONT",
       "col": 15,
@@ -2057,12 +1991,6 @@
       "type": "PC_FRONT_OFF",
       "col": 16,
       "row": 18
-    },
-    {
-      "uid": "seat-chair-35",
-      "type": "WOODEN_CHAIR_BACK",
-      "col": 16,
-      "row": 19.2
     },
     {
       "uid": "seat-desk-36",
@@ -2077,15 +2005,9 @@
       "row": 16
     },
     {
-      "uid": "seat-chair-38",
-      "type": "WOODEN_CHAIR_BACK",
-      "col": 32,
-      "row": 17.2
-    },
-    {
       "uid": "o3-bookshelf",
       "type": "DOUBLE_BOOKSHELF",
-      "col": 31,
+      "col": 27,
       "row": 12
     },
     {
@@ -2115,8 +2037,8 @@
     {
       "uid": "lr-tv",
       "type": "LARGE_PAINTING",
-      "col": 33,
-      "row": 1
+      "col": 32,
+      "row": 0
     },
     {
       "uid": "lr-coffee",
@@ -2176,7 +2098,7 @@
       "uid": "o3-small-plant",
       "type": "PLANT_2",
       "col": 38,
-      "row": 21
+      "row": 20
     }
   ]
 }
