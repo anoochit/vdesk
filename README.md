@@ -6,7 +6,14 @@
 
 ## 🚀 Overview
 
-The project simulates an office floor where AI agents perform tasks, "think" about solutions, and collaborate. As the agents run in the Python backend, their internal states (thinking, acting, idling) are published to an MQTT broker and visualized in a 16-bit web interface.
+The project simulates an office floor where AI agents perform tasks, "think" about solutions, and collaborate. As the agents run in the Python backend, their internal states (thinking, acting, idling) are published to an MQTT broker and visualized in a 16-bit web interface with a tiled map system and autonomous sprite-based agents.
+
+### Key Features
+- **Tiled Map System**: Renders a complex office layout (floors, walls, furniture) from a JSON configuration in the frontend.
+- **Sprite-Based Agents**: Agents use animated sprite sheets and autonomously walk to their assigned desks when active, or wander the office floor when idle.
+- **Multi-Agent Orchestration**: Demonstrates agent delegation using the ADK `sub_agents` pattern in the backend.
+- **Real-time State Sync**: Uses ADK callbacks to publish agent states to MQTT, which the frontend uses to display status bubbles.
+- **Tool Integration**: Agents are equipped with tools like a `calculator` and `check_server_status` monitor.
 
 ## 🏗️ Architecture
 
@@ -19,12 +26,12 @@ The project simulates an office floor where AI agents perform tasks, "think" abo
 The office currently features three specialized agents:
 
 1.  **Manager (`mgr_agent`)**: The orchestrator. Capable of delegating complex tasks to specialized agents.
-2.  **Dev (`dev_agent`)**: A software engineer specializing in low-level code (C and Assembly).
+2.  **Dev (`dev_agent`)**: A software engineer specializing in efficient assembly and C code.
 3.  **Ops (`ops_agent`)**: A systems specialist equipped with calculation and server monitoring tools.
 
 ## 🏁 Getting Started
 
-### 1. Run the Agents
+### 1. Run the Agents (Backend)
 
 Requires Python 3.13+ and a Google GenAI API Key.
 
@@ -36,13 +43,15 @@ uv sync
 python main.py
 ```
 
-### 2. Start the Web Interface
+### 2. Start the Web Interface (Frontend)
 
 Requires Node.js 18+.
 
 ```bash
 cd vdesk-web
 npm install
+# Sync agent configuration from the Python backend
+node sync-agents.cjs 
 npm run dev
 ```
 
@@ -62,6 +71,12 @@ The bridge between logic and visuals is the MQTT topic:
   "timestamp": 1741512345.678
 }
 ```
+
+### Status Types
+
+* `thinking`: The agent has sent a request to the LLM.
+* `acting`: The agent is executing a tool.
+* `idle`: The agent has completed its turn.
 
 ## 🗺️ Roadmap
 
