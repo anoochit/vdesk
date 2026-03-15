@@ -69,6 +69,10 @@ The bridge between logic and visuals is the MQTT topic:
 - [ ] **Enhanced Security**: Move away from public brokers to a secured, private MQTT instance.
 - [ ] **Agent Customization**: Allow users to define new agents and their desk locations via a config file.
 
+## 💡 Inspiration
+
+This project was inspired by the excellent [pixel-agents](https://github.com/pablodelucca/pixel-agents) project.
+
 ## 📄 License
 
 This project is licensed under the [MIT License](./LICENSE).
