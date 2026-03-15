@@ -1,0 +1,96 @@
+---
+import layoutData from '../../public/assets/default-layout-1.json';
+
+const { cols, rows, tiles, furniture } = layoutData;
+export const TILE_SIZE = 32; // Map scale, 1 tile = 32x32 pixels on screen
+
+const floorMap: Record<number, string> = {
+  0: 'floor_0.png',
+  1: 'floor_1.png',
+  7: 'floor_7.png',
+  9: 'floor_8.png', 
+};
+
+function getFloorImage(tileId: number) {
+  if (tileId === 255) return null;
+  return `/assets/floors/${floorMap[tileId] || 'floor_0.png'}`;
+}
+
+const FOLDER_MAP: Record<string, string> = {
+  "TABLE_FRONT": "TABLE_FRONT",
+  "COFFEE_TABLE": "COFFEE_TABLE",
+  "SOFA_SIDE": "SOFA",
+  "SOFA_BACK": "SOFA",
+  "SOFA_FRONT": "SOFA",
+  "HANGING_PLANT": "HANGING_PLANT",
+  "DOUBLE_BOOKSHELF": "DOUBLE_BOOKSHELF",
+  "SMALL_PAINTING": "SMALL_PAINTING",
+  "CLOCK": "CLOCK",
+  "PLANT": "PLANT",
+  "COFFEE": "COFFEE",
+  "WOODEN_CHAIR_SIDE": "WOODEN_CHAIR",
+  "WOODEN_CHAIR_FRONT": "WOODEN_CHAIR",
+  "WOODEN_CHAIR_BACK": "WOODEN_CHAIR",
+  "DESK_FRONT": "DESK",
+  "DESK_SIDE": "DESK",
+  "CUSHIONED_BENCH": "CUSHIONED_BENCH",
+  "PC_FRONT_OFF": "PC",
+  "PC_SIDE": "PC",
+  "PLANT_2": "PLANT_2",
+  "LARGE_PAINTING": "LARGE_PAINTING",
+  "BIN": "BIN",
+  "SMALL_TABLE_FRONT": "SMALL_TABLE",
+  "SMALL_TABLE_SIDE": "SMALL_TABLE",
+  "SMALL_PAINTING_2": "SMALL_PAINTING_2"
+};
+
+function getFurnitureImage(typeStr: string) {
+  const baseType = typeStr.split(':')[0];
+  const folder = FOLDER_MAP[baseType] || baseType;
+  return `/assets/furniture/${folder}/${baseType}.png`;
+}
+---
+
+<div class="map-container" style={`width: ${cols * TILE_SIZE}px; height: ${rows * TILE_SIZE}px; position: relative; margin: 0 auto; background-color: #1a1a1a;`}>
+  <!-- Floors & Walls -->
+  {tiles.map((tileId, index) => {
+    if (tileId === 255) {
+      // Wall boundary tile
+      return (
+        <div class="tile wall" style={`left: ${(index % cols) * TILE_SIZE}px; top: ${Math.floor(index / cols) * TILE_SIZE}px; width: ${TILE_SIZE}px; height: ${TILE_SIZE}px; position: absolute;`}>
+            <img src="/assets/walls/wall_0.png" style="width: 100%; height: 100%; image-rendering: pixelated; opacity: 0.5;" />
+        </div>
+      );
+    }
+    const bg = getFloorImage(tileId);
+    return bg ? (
+      <div class="tile floor" style={`left: ${(index % cols) * TILE_SIZE}px; top: ${Math.floor(index / cols) * TILE_SIZE}px; width: ${TILE_SIZE}px; height: ${TILE_SIZE}px; position: absolute;`}>
+        <img src={bg} style="width: 100%; height: 100%; image-rendering: pixelated;" />
+      </div>
+    ) : null;
+  })}
+
+  <!-- Furniture -->
+  {furniture.map((item) => {
+    const isMirrored = item.type.includes(':left');
+    const src = getFurnitureImage(item.type);
+    
+    // Scale images by 2x natively using CSS transform or width, but it's simpler to use image-rendering and width: 200%.
+    // Because we don't know the exact width/height from the JSON directly without reading manifests, 
+    // we use a CSS trick: the image itself contains the size. 
+    // Actually, setting zoom: 2 works in many browsers, but transform scale is better.
+    return (
+      <div class="furniture" style={`left: ${item.col * TILE_SIZE}px; top: ${item.row * TILE_SIZE}px; position: absolute; z-index: ${Math.floor(item.row)};`}>
+        <img src={src} class="furniture-img" style={`transform: ${isMirrored ? 'scaleX(-2) scaleY(2)' : 'scale(2)'}; transform-origin: top left; image-rendering: pixelated;`} onerror="this.style.display='none'" />
+      </div>
+    );
+  })}
+
+  <slot />
+</div>
+
+<style>
+  .furniture-img {
+    pointer-events: none;
+  }
+</style>

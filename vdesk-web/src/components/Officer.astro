@@ -2,24 +2,28 @@
 interface Props {
   agentId: string;
   name: string;
-  x: number;
-  y: number;
-  initialEmoji?: string;
+  sprite: string;
+  initialX: number;
+  initialY: number;
 }
 
-const { agentId, name, x, y, initialEmoji = "🤖" } = Astro.props;
+const { agentId, name, sprite, initialX, initialY } = Astro.props;
 ---
 
-<div class="officer" id={`officer-${agentId}`} style={`left: ${x}px; top: ${y}px;`}>
+<div class="officer" id={`officer-${agentId}`} style={`left: ${initialX}px; top: ${initialY}px; z-index: ${Math.floor(initialY / 32)};`} data-home-x={initialX} data-home-y={initialY}>
   <div class="bubble-container">
     <div class="nes-balloon from-left is-dark status-bubble hidden" id={`bubble-${agentId}`}>
       <p class="message-text" id={`text-${agentId}`}>Ready.</p>
     </div>
   </div>
   
-  <div class="sprite-container">
-    
-      <span class="agent-emoji" id={`emoji-${agentId}`}>{initialEmoji}</span>
+  <div class="sprite-container" id={`sprite-container-${agentId}`}>
+    <!-- The sprite is now a div with the sheet as background -->
+    <div 
+        class="agent-sprite-sheet" 
+        id={`sprite-${agentId}`} 
+        style={`background-image: url(${sprite});`}
+    ></div>
     
     <div class="status-indicator hidden" id={`status-${agentId}`}>
       <i class="nes-icon is-small heart"></i>
@@ -33,7 +37,161 @@ const { agentId, name, x, y, initialEmoji = "🤖" } = Astro.props;
 
 <script>
   import mqtt from 'mqtt';
-import { MQTT_BROKER_URL } from '../config/agents';
+  import { MQTT_BROKER_URL } from '../config/agents';
+
+  // Constants matching the map
+  const TILE_SIZE = 32;
+  const MAP_COLS = 40;
+  const MAP_ROWS = 23;
+  const MAP_WIDTH = MAP_COLS * TILE_SIZE;
+  const MAP_HEIGHT = MAP_ROWS * TILE_SIZE;
+
+  // Sprite Sheet Constants (assuming 16x32 frames)
+  const FRAME_W = 16;
+  const FRAME_H = 32;
+
+  // Directions mapping to rows in sprite sheet
+  const ROW_FRONT = 0;
+  const ROW_BACK = 1;
+  const ROW_SIDE = 2;
+
+  function setSpriteFrame(el: HTMLElement, col: number, row: number, mirror: boolean = false) {
+    el.style.backgroundPosition = `-${col * FRAME_W}px -${row * FRAME_H}px`;
+    el.style.transform = `scale(2) ${mirror ? 'scaleX(-1)' : ''}`;
+  }
+
+  function startAgentLogic(officerEl: HTMLElement, spriteEl: HTMLElement) {
+    const homeX = parseFloat(officerEl.dataset.homeX || '0');
+    const homeY = parseFloat(officerEl.dataset.homeY || '0');
+    
+    let isMoving = false;
+    let currentDir = ROW_BACK; // Default to facing PC
+    let currentMirror = false;
+    let currentWalkId = 0;
+    let animFrame = 0;
+    let currentTargetX = homeX;
+    let currentTargetY = homeY;
+
+    // Animation Loop for the sprite frames
+    setInterval(() => {
+        if (!isMoving) {
+            setSpriteFrame(spriteEl, 1, currentDir, currentMirror);
+            return;
+        }
+        const cycle = [0, 1, 2, 1];
+        const col = cycle[animFrame % 4];
+        setSpriteFrame(spriteEl, col, currentDir, currentMirror);
+        animFrame++;
+    }, 200);
+
+    function walkTo(targetX: number, targetY: number, onComplete?: () => void) {
+        if (targetX === currentTargetX && targetY === currentTargetY && isMoving) {
+            // Already moving to this exact target, don't interrupt
+            return;
+        }
+
+        const walkId = ++currentWalkId;
+        isMoving = true;
+        currentTargetX = targetX;
+        currentTargetY = targetY;
+
+        const comp = window.getComputedStyle(officerEl);
+        const currentLeft = parseFloat(comp.left || '0');
+        const currentTop = parseFloat(comp.top || '0');
+
+        // Interrupt current transition
+        officerEl.style.transition = 'none';
+        officerEl.style.left = `${currentLeft}px`;
+        officerEl.style.top = `${currentTop}px`;
+        void officerEl.offsetWidth; // force reflow
+
+        const dx = targetX - currentLeft;
+        const dy = targetY - currentTop;
+
+        if (Math.abs(dx) > Math.abs(dy)) {
+            currentDir = ROW_SIDE;
+            currentMirror = dx < 0;
+        } else {
+            currentDir = dy > 0 ? ROW_FRONT : ROW_BACK;
+            currentMirror = false;
+        }
+
+        const dist = Math.hypot(dx, dy);
+        if (dist < 5) {
+            isMoving = false;
+            officerEl.style.left = `${targetX}px`;
+            officerEl.style.top = `${targetY}px`;
+            officerEl.style.zIndex = Math.floor(targetY / TILE_SIZE).toString();
+            if (onComplete) onComplete();
+            return;
+        }
+
+        const speed = 80; // pixels per second
+        const duration = dist / speed;
+
+        officerEl.style.transition = `left ${duration}s linear, top ${duration}s linear`;
+        officerEl.style.left = `${targetX}px`;
+        officerEl.style.top = `${targetY}px`;
+        officerEl.style.zIndex = Math.floor(targetY / TILE_SIZE).toString();
+
+        setTimeout(() => {
+            if (currentWalkId === walkId) {
+                isMoving = false;
+                if (onComplete) onComplete();
+            }
+        }, duration * 1000);
+    }
+
+    function goHome() {
+        const comp = window.getComputedStyle(officerEl);
+        const currentLeft = parseFloat(comp.left || '0');
+        const currentTop = parseFloat(comp.top || '0');
+        
+        if (Math.hypot(currentLeft - homeX, currentTop - homeY) < 5) {
+            // Already home
+            isMoving = false;
+            currentDir = ROW_BACK; // Face PC
+            currentMirror = false;
+            setSpriteFrame(spriteEl, 1, currentDir, currentMirror);
+            return;
+        }
+
+        walkTo(homeX, homeY, () => {
+            currentDir = ROW_BACK; // Face PC
+            currentMirror = false;
+            setSpriteFrame(spriteEl, 1, currentDir, currentMirror);
+        });
+    }
+
+    // Expose forceHome to be called externally
+    (officerEl as any).forceHome = goHome;
+
+    // Idle wandering loop
+    setInterval(() => {
+        const status = officerEl.dataset.status || 'idle';
+        
+        if (status !== 'idle') {
+            // If they should be working but are somehow not moving and not at home, fix it.
+            const comp = window.getComputedStyle(officerEl);
+            const currentLeft = parseFloat(comp.left || '0');
+            const currentTop = parseFloat(comp.top || '0');
+            if (!isMoving && Math.hypot(currentLeft - homeX, currentTop - homeY) > 5) {
+                goHome();
+            }
+            return; 
+        }
+
+        // If they are thinking or acting, do not wander
+        if (officerEl.classList.contains('thinking-anim')) return;
+
+        // Random chance to wander when idle
+        if (!isMoving && Math.random() <= 0.3) {
+            const targetX = Math.floor(Math.random() * (MAP_WIDTH - 64)) + 32;
+            const targetY = Math.floor(Math.random() * (MAP_HEIGHT - 64)) + 32;
+            walkTo(targetX, targetY);
+        }
+    }, 4000);
+  }
 
   const officerElements = document.querySelectorAll('.officer');
   
@@ -42,27 +200,38 @@ import { MQTT_BROKER_URL } from '../config/agents';
     const bubble = document.getElementById(`bubble-${agentId}`);
     const textEl = document.getElementById(`text-${agentId}`);
     const statusInd = document.getElementById(`status-${agentId}`);
-    const emojiEl = document.getElementById(`emoji-${agentId}`);
+    const spriteEl = document.getElementById(`sprite-${agentId}`);
+    const officerEl = el as HTMLElement;
 
-    // Connect to public broker via WebSocket
+    if (spriteEl) {
+      startAgentLogic(officerEl, spriteEl);
+    }
+
     const client = mqtt.connect(MQTT_BROKER_URL);
 
     client.on('connect', () => {
-      console.log(`Connected MQTT: ${agentId}`);
       client.subscribe(`voffice/agents/${agentId}/events`);
     });
 
     client.on('message', (topic, message) => {
       const data = JSON.parse(message.toString());
+      const newStatus = (data.status || 'idle').toLowerCase();
+      const oldStatus = officerEl.dataset.status || 'idle';
       
+      officerEl.dataset.status = newStatus;
+
+      // State Transition: became busy, send them back to their chair immediately
+      if (newStatus !== 'idle' && oldStatus === 'idle') {
+          if (typeof (officerEl as any).forceHome === 'function') {
+              (officerEl as any).forceHome();
+          }
+      }
+
       if (textEl && bubble) {
         textEl.textContent = data.message;
         bubble.classList.remove('hidden');
-        
-        // Auto-hide bubble after 5 seconds if not "thinking"
-        if (data.status !== 'thinking') {
+        if (newStatus !== 'thinking') {
           setTimeout(() => {
-            // Only hide if the message hasn't changed
             if (textEl.textContent === data.message) {
               bubble.classList.add('hidden');
             }
@@ -71,12 +240,12 @@ import { MQTT_BROKER_URL } from '../config/agents';
       }
 
       if (statusInd) {
-        if (data.status === 'thinking') {
+        if (newStatus === 'thinking') {
           statusInd.classList.remove('hidden');
-          el.classList.add('thinking-anim');
+          officerEl.classList.add('thinking-anim');
         } else {
           statusInd.classList.add('hidden');
-          el.classList.remove('thinking-anim');
+          officerEl.classList.remove('thinking-anim');
         }
       }
     });
@@ -89,45 +258,55 @@ import { MQTT_BROKER_URL } from '../config/agents';
     display: flex;
     flex-direction: column;
     align-items: center;
-    transition: all 0.5s ease-in-out;
-    width: 120px;
+    width: 64px;
+    margin-left: -32px; 
+    margin-top: -64px; 
+    pointer-events: none;
   }
 
   .sprite-container {
     position: relative;
     cursor: pointer;
-  }
-
-  .sprite-box {
-    padding: 10px !important;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #333 !important;
+    width: 32px;
+    height: 64px;
+    pointer-events: auto;
   }
 
-  .agent-emoji {
-    font-size: 3.5rem;
+  .agent-sprite-sheet {
+    width: 16px;
+    height: 32px;
+    image-rendering: pixelated;
+    background-repeat: no-repeat;
+    transform: scale(2);
+    transform-origin: center bottom;
   }
 
   .bubble-container {
     position: absolute;
-    bottom: 80%;
-    left: 25%;
+    bottom: 110%;
+    left: 200%;
+    transform: translateX(-50%);
     width: 250px;
-    z-index: 10;
+    z-index: 1000;
     color: black;
+    pointer-events: none;
+    margin-bottom: 10px;
   }
 
   .status-bubble {
     padding: 0.5rem !important;
     font-size: 8px;
     line-height: 1.2;
+    pointer-events: auto;
   }
 
   .name-tag {
-    margin-top: 8px;
-    transform: scale(0.8);
+    margin-top: -10px;
+    transform: scale(0.5);
+    white-space: nowrap;
   }
 
   .hidden {
@@ -136,8 +315,8 @@ import { MQTT_BROKER_URL } from '../config/agents';
 
   .status-indicator {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: -5px;
+    right: -15px;
   }
 
   @keyframes bounce {
@@ -145,8 +324,7 @@ import { MQTT_BROKER_URL } from '../config/agents';
     50% { transform: translateY(-5px); }
   }
 
-  .thinking-anim .sprite-box {
+  .thinking-anim .sprite-container {
     animation: bounce 0.5s infinite;
-    border-color: #209cee !important;
   }
 </style>

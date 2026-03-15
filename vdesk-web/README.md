@@ -49,7 +49,7 @@ The office will be available at `http://localhost:4321`.
 
 ## 📂 Project Structure
 
-- `src/config/agents.ts`: **Central configuration** for agent metadata (IDs, names, icons).
+- `src/config/agents.ts`: **Central configuration** for agent metadata (IDs, names, sprites, and MQTT broker URL).
 - `src/pages/index.astro`: Main office layout, grid definition, and desk placement.
 - `src/components/Officer.astro`: Reusable agent component. Handles MQTT subscriptions and state-based animations.
 - `public/`: Static assets and icons.
@@ -60,9 +60,12 @@ To add or modify agents in the virtual office, edit `src/config/agents.ts`:
 
 ```typescript
 export const agents: Agent[] = [
-  { "agentId" : "dev_agent", "name" : "Developer", "initialEmoji": "👨‍💻" },
-  // Add new agents here...
+	{ "agentId" : "dev_agent", "name" : "Developer", "sprite": "/assets/characters/char_0.png" },
+	{ "agentId" : "ops_agent", "name" : "Operations", "sprite": "/assets/characters/char_1.png" },
+	{ "agentId" : "mgr_agent", "name" : "Manager", "sprite": "/assets/characters/char_2.png" }
 ];
+
+export const MQTT_BROKER_URL = "wss://broker.emqx.io:8084/mqtt";
 ```
 
 ## 🔌 MQTT Integration
@@ -73,4 +76,4 @@ The UI listens for events on the following topic pattern:
 Ensure that the `agentId` in `src/config/agents.ts` matches the `agent_id` configured in the Python backend.
 
 ---
-Part of the [vdesk](https://github.com/your-repo/vdesk) project.
+Part of the [vdesk](../README.md) project.
