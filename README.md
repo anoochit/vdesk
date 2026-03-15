@@ -30,8 +30,9 @@ Requires Python 3.13+ and a Google GenAI API Key.
 
 ```bash
 cd vdesk-agents
-uv sync # or pip install -r requirements.txt
+uv sync 
 # Create a .env file with GOOGLE_API_KEY=your_key
+# Run demo agent OR you might change to chatloop
 python main.py
 ```
 
