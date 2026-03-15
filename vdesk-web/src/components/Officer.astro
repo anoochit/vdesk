@@ -17,7 +17,7 @@ const { agentId, name, sprite, initialX, initialY } = Astro.props;
     </div>
   </div>
   
-  <div class="sprite-container" id={`sprite-container-${agentId}`}>
+  <div class="sprite-container nes-pointer" id={`sprite-container-${agentId}`}>
     <!-- The sprite is now a div with the sheet as background -->
     <div 
         class="agent-sprite-sheet" 
@@ -288,7 +288,6 @@ const { agentId, name, sprite, initialX, initialY } = Astro.props;
 
   .sprite-container {
     position: relative;
-    cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;

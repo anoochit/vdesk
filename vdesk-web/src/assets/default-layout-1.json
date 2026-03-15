@@ -2014,25 +2014,25 @@
       "uid": "lr-sofa-main",
       "type": "SOFA_FRONT",
       "col": 32,
-      "row": 3
+      "row": 4
     },
     {
       "uid": "lr-sofa-left",
       "type": "SOFA_SIDE",
       "col": 30,
-      "row": 5
+      "row": 6
     },
     {
       "uid": "lr-sofa-right",
       "type": "SOFA_SIDE:left",
       "col": 36,
-      "row": 5
+      "row": 6
     },
     {
       "uid": "lr-table",
       "type": "COFFEE_TABLE",
       "col": 32,
-      "row": 5
+      "row": 6
     },
     {
       "uid": "lr-tv",
@@ -2044,7 +2044,7 @@
       "uid": "lr-coffee",
       "type": "COFFEE",
       "col": 32,
-      "row": 5
+      "row": 6
     },
     {
       "uid": "lr-bookshelf",
@@ -2099,6 +2099,54 @@
       "type": "PLANT_2",
       "col": 38,
       "row": 20
+    },
+    {
+      "uid": "seat-desk-39",
+      "type": "DESK_FRONT",
+      "col": 21,
+      "row": 2
+    },
+    {
+      "uid": "seat-pc-40",
+      "type": "PC_FRONT_OFF",
+      "col": 22,
+      "row": 2
+    },
+    {
+      "uid": "seat-desk-41",
+      "type": "DESK_FRONT",
+      "col": 21,
+      "row": 6
+    },
+    {
+      "uid": "seat-pc-42",
+      "type": "PC_FRONT_OFF",
+      "col": 22,
+      "row": 6
+    },
+    {
+      "uid": "seat-desk-43",
+      "type": "DESK_FRONT",
+      "col": 21,
+      "row": 14
+    },
+    {
+      "uid": "seat-pc-44",
+      "type": "PC_FRONT_OFF",
+      "col": 22,
+      "row": 14
+    },
+    {
+      "uid": "seat-desk-45",
+      "type": "DESK_FRONT",
+      "col": 21,
+      "row": 18
+    },
+    {
+      "uid": "seat-pc-46",
+      "type": "PC_FRONT_OFF",
+      "col": 22,
+      "row": 18
     }
   ]
 }
