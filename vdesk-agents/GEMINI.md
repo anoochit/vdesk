@@ -6,47 +6,53 @@
 
 ### Architecture & Key Components
 
-*   **Google ADK**: Utilizes `LlmAgent`, `Runner`, and `InMemorySessionService` to manage conversational state and execution.
-*   **Multi-Agent Orchestration**: Features a hierarchical agent setup:
-    *   **Manager Agent (`mgr_agent`)**: The primary orchestrator that delegates tasks to specialized sub-agents.
-    *   **Dev Agent (`dev_agent`)**: Specialized in writing efficient assembly and C code.
-    *   **Ops Agent (`ops_agent`)**: Specialized in system monitoring and calculation.
-*   **Tools**: Agents have access to custom tools such as `calculator` and `check_server_status`.
-*   **MQTT Telemetry**: ADK lifecycle callbacks (`before_model`, `after_agent`, `before_tool`) are hooked into an `OfficeMqttBridge` (in `mqtt_bridge.py`) to publish JSON event payloads containing the agent's status (`thinking`, `acting`, `idle`).
-*   **Model**: Configured to use `gemini-2.5-flash` by default.
+* **Google ADK**: Utilizes `LlmAgent` and sub-agent patterns to manage conversational state and execution.
+* **Multi-Agent Orchestration**: Features a hierarchical agent setup:
+  * **Manager Agent (`mgr_agent`)**: The primary orchestrator that delegates tasks to specialized sub-agents.
+  * **Dev Agent (`dev_agent`)**: Specialized in writing efficient assembly and C code.
+  * **Ops Agent (`ops_agent`)**: Specialized in system monitoring and calculation.
+* **Tools**: Agents have access to custom tools such as `calculator` and `check_server_status`.
+* **MQTT Telemetry**: ADK lifecycle callbacks (`before_model`, `after_agent`, `before_tool`) are hooked into an `OfficeMqttBridge` (in `root_agent/mqtt_bridge.py`) to publish JSON event payloads containing the agent's status (`thinking`, `acting`, `idle`).
+* **Model**: Configured to use `gemini-2.5-flash` by default.
+* **API Server**: Exposes the agents via a FastAPI server, configured in `main.py`.
 
 ## Building and Running
 
 ### Prerequisites
-*   Python 3.13 or higher.
-*   [uv](https://github.com/astral-sh/uv) package manager.
-*   A valid Google Gemini API Key.
+
+* Python 3.13 or higher.
+* [uv](https://github.com/astral-sh/uv) package manager.
+* A valid Google Gemini API Key.
 
 ### Setup Instructions
 
-1.  **Install Dependencies:**
+1. **Install Dependencies:**
     Use `uv` to sync the environment based on `pyproject.toml` and `uv.lock`:
+
     ```bash
     uv sync
     ```
 
-2.  **Environment Variables:**
+2. **Environment Variables:**
     Create a `.env` file in the root directory and add your Google API key:
+
     ```env
     GOOGLE_API_KEY=your_api_key_here
     ```
 
 ### Running the Application
 
-To run the simulation and execute the predefined demo tasks, execute the main script:
+To run the FastAPI server, execute the main script:
+
 ```bash
-uv run python main.py
+uv run main.py
 ```
-*Note: The script connects to the public MQTT broker, initializes the agents, and runs a series of async queries, printing the final responses to the console.*
+
+This will start the server, making the agents available via the ADK's web interface and API endpoints.
 
 ## Development Conventions
 
-*   **Agent Definitions**: All agent personas, tools, and configurations are defined in `agents.py`. When adding new tools or agents, place them here.
-*   **Event Driven**: Any new agent or tool should have the standard callbacks (`before_model_callback`, `after_agent_callback`, `before_tool_callback`) attached to ensure its state is properly synced over MQTT.
-*   **Configuration**: Global constants (like MQTT broker details, model names, and application IDs) are centralized in `config.py`.
-*   **Asynchronous Execution**: The project uses `asyncio` for running the ADK `Runner`. Ensure any new orchestration logic respects the async/await patterns established in `main.py`.
+* **Agent Definitions**: All agent personas, tools, and configurations are defined in `root_agent/agent.py`. When adding new tools or agents, place them here.
+* **Event Driven**: Any new agent or tool should have the standard callbacks (`before_model_callback`, `after_agent_callback`, `before_tool_callback`) attached to ensure its state is properly synced over MQTT.
+* **Configuration**: Global constants (like MQTT broker details, model names, and application IDs) are centralized in `config.py`.
+* **Entry Point**: The main entry point is `main.py`, which sets up and runs the FastAPI application.

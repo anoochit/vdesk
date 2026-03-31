@@ -11,7 +11,7 @@ from config import MQTT_BROKER, MQTT_PORT, MQTT_TOPIC_PREFIX
 
 class OfficeMqttBridge:
     def __init__(self):
-        self.client = mqtt.Client(callback_api_version=mqtt.CallbackAPIVersion.VERSION2)
+        self.client = mqtt.Client(client_id="vdesk_agents")
         self.client.connect(MQTT_BROKER, MQTT_PORT, 60)
         self.client.loop_start()
 
@@ -23,7 +23,7 @@ class OfficeMqttBridge:
             "timestamp": time.time()
         }
         topic = f"{MQTT_TOPIC_PREFIX}/{agent_id}/events"
-        print(f"[MQTT] Publishing to {topic}: {status} - {message[:30]}...")
+        print(f"[MQTT] Publishing to {topic}: {status} - {message[:30]}")
         self.client.publish(topic, json.dumps(payload))
 
 bridge = OfficeMqttBridge()
@@ -33,14 +33,14 @@ def before_model_cb(
     llm_request: LlmRequest
 ) -> Optional[LlmResponse]:
     agent_id = callback_context.agent_name.lower().replace(" ", "_")
-    bridge.publish_event(agent_id, "thinking", "Wait... I'm thinking...")
+    bridge.publish_event(agent_id, "thinking", "thinking...")
     return None
 
 def after_agent_cb(
     callback_context: CallbackContext
 ) -> Optional[types.Content]:
     agent_id = callback_context.agent_name.lower().replace(" ", "_")
-    bridge.publish_event(agent_id, "idle", "Agent turn complete.")
+    bridge.publish_event(agent_id, "idle", "complete!")
     return None
 
 def before_tool_cb(
@@ -49,5 +49,5 @@ def before_tool_cb(
     tool_context: ToolContext
 ) -> Optional[dict]:
     agent_id = tool_context.agent_name.lower().replace(" ", "_")
-    bridge.publish_event(agent_id, "acting", f"Executing tool: {tool.name}")
+    bridge.publish_event(agent_id, "acting", f" {tool.name.replace('_', ' ')}")
     return None

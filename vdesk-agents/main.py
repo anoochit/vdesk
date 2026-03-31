@@ -1,42 +1,34 @@
-import asyncio
-import time
-from google.adk.runners import Runner
-from google.adk.sessions import InMemorySessionService
-from google.genai import types
-from agents import mgr_agent
-from config import APP_NAME, DEFAULT_USER_ID, DEFAULT_SESSION_ID
+import os
 
-async def run_demo_task(query):
-    session_service = InMemorySessionService()
-    runner = Runner(
-        agent=mgr_agent,
-        app_name=APP_NAME,
-        session_service=session_service,
-    )
+import uvicorn
+from fastapi import FastAPI
+from google.adk.cli.fast_api import get_fast_api_app
 
-    await session_service.create_session(
-        app_name=APP_NAME,
-        user_id=DEFAULT_USER_ID,
-        session_id=DEFAULT_SESSION_ID
-    )
+# Get the directory where main.py is located
+AGENT_DIR = os.path.dirname(os.path.abspath(__file__))
+# Example session service URI (e.g., SQLite)
+# Note: Use 'sqlite+aiosqlite' instead of 'sqlite' because DatabaseSessionService requires an async driver
+SESSION_SERVICE_URI = "sqlite+aiosqlite:///./sessions.db"
+# Example allowed origins for CORS
+ALLOWED_ORIGINS = ["http://localhost", "http://localhost:8080", "*"]
+# Set web=True if you intend to serve a web interface, False otherwise
+SERVE_WEB_INTERFACE = True
 
-    print(f"\n--- Running Task: {query} ---")
-    async for event in runner.run_async(
-        user_id=DEFAULT_USER_ID,
-        session_id=DEFAULT_SESSION_ID,
-        new_message=types.Content(role="user", parts=[types.Part(text=query)])
-    ):
-        if event.is_final_response():
-            print(f"Final Response: {event.content.parts[0].text}")
+# Call the function to get the FastAPI app instance
+# Ensure the agent directory name ('capital_agent') matches your agent folder
+app: FastAPI = get_fast_api_app(
+    agents_dir=AGENT_DIR,
+    session_service_uri=SESSION_SERVICE_URI,
+    allow_origins=ALLOWED_ORIGINS,
+    web=SERVE_WEB_INTERFACE,
+)
+
+# You can add more FastAPI routes or configurations below if needed
+# Example:
+# @app.get("/hello")
+# async def read_root():
+#     return {"Hello": "World"}
 
 if __name__ == "__main__":
-    queries = [
-        "What is 1024 / 4?",
-        "Check the mainframe status.",
-        "Write a simple C function to add two numbers.",
-        "Manager, please ask Ops to check the server and then ask Dev to write a script for it."
-    ]
-
-    for q in queries:
-        asyncio.run(run_demo_task(q))
-        time.sleep(2)
+    # Use the PORT environment variable provided by Cloud Run, defaulting to 8080
+    uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 8080)))

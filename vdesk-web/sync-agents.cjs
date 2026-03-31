@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Resolve paths relative to the script's location
-const agentsPyPath = path.join(__dirname, '../vdesk-agents/agents.py');
+const agentsPyPath = path.join(__dirname, '../vdesk-agents/root_agent/agent.py');
 const agentsTsPath = path.join(__dirname, 'src/config/agents.ts');
 
 console.log(`Reading agents from: ${agentsPyPath}`);

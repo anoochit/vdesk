@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@fontsource/press-start-2p": "^5.2.7",
-    "astro": "^5.17.1",
+    "astro": "^6.1.2",
     "mqtt": "^5.15.0",
     "nes.css": "^2.2.1"
   }

@@ -1,91 +1,58 @@
-# vdesk-agents: Python Backend
+# vdesk-agents
 
-`vdesk-agents` is the backend component of the **vdesk** project. It defines and runs AI agents using the [Google Agent Developer Kit (ADK)](https://github.com/google/agent-developer-kit) and communicates their internal state to a public MQTT broker for real-time visualization in the [vdesk-web](../vdesk-web) frontend.
+## Project Overview
 
-## Overview
+`vdesk-agents` is the Python-based backend component of the **vdesk** project. It leverages the **Google Agent Developer Kit (ADK)** and the Gemini API to simulate a virtual, retro-style 16-bit office environment. The backend defines multiple AI agents that collaborate and communicate their internal states in real-time to a public MQTT broker (`broker.emqx.io`). This allows a separate frontend (`vdesk-web`) to visualize the agents' thought processes and actions.
 
-The backend simulates a virtual 16-bit office environment with three specialized agents:
+### Architecture & Key Components
 
-1. **Manager Agent (`mgr_agent`)**: The orchestrator. It delegates tasks to the Dev and Ops agents.
-2. **Dev Agent (`dev_agent`)**: A software developer specializing in efficient assembly and C code.
-3. **Ops Agent (`ops_agent`)**: A systems specialist equipped with calculation and server monitoring tools.
+* **Google ADK**: Utilizes `LlmAgent` and sub-agent patterns to manage conversational state and execution.
+* **Multi-Agent Orchestration**: Features a hierarchical agent setup:
+  * **Manager Agent (`mgr_agent`)**: The primary orchestrator that delegates tasks to specialized sub-agents.
+  * **Dev Agent (`dev_agent`)**: Specialized in writing efficient assembly and C code.
+  * **Ops Agent (`ops_agent`)**: Specialized in system monitoring and calculation.
+* **Tools**: Agents have access to custom tools such as `calculator` and `check_server_status`.
+* **MQTT Telemetry**: ADK lifecycle callbacks (`before_model`, `after_agent`, `before_tool`) are hooked into an `OfficeMqttBridge` (in `root_agent/mqtt_bridge.py`) to publish JSON event payloads containing the agent's status (`thinking`, `acting`, `idle`).
+* **Model**: Configured to use `gemini-2.5-flash` by default.
+* **API Server**: Exposes the agents via a FastAPI server, configured in `main.py`.
 
-### Key Features
-
-* **Real-time State Sync**: Uses ADK callbacks (`before_model`, `after_agent`, `before_tool`) to publish agent states to MQTT.
-* **Tool Integration**: Includes a `calculator` and `check_server_status` monitor.
-* **Multi-Agent Orchestration**: Demonstrates agent delegation using the ADK `sub_agents` pattern.
-
-## Getting Started
+## Building and Running
 
 ### Prerequisites
 
-* Python 3.13+
-* [uv](https://github.com/astral-sh/uv) (recommended) or `pip`
-* Google GenAI API Key (configured via environment variables)
+* Python 3.13 or higher.
+* [uv](https://github.com/astral-sh/uv) package manager.
+* A valid Google Gemini API Key.
 
-### Installation
+### Setup Instructions
 
-1. **Clone the repository and navigate to the directory**:
-
-    ```bash
-    cd vdesk-agents
-    ```
-
-2. **Set up the environment**:
-    Using `uv`:
+1. **Install Dependencies:**
+    Use `uv` to sync the environment based on `pyproject.toml` and `uv.lock`:
 
     ```bash
     uv sync
     ```
 
-    Using `pip`:
-
-    ```bash
-    python -m venv .venv
-    source .venv/bin/activate  # Or .venv\Scripts\activate on Windows
-    pip install -r requirements.txt
-    ```
-
-3. **Configure Environment Variables**:
-    Create a `.env` file and add your Google API key:
+2. **Environment Variables:**
+    Create a `.env` file in the root directory and add your Google API key:
 
     ```env
     GOOGLE_API_KEY=your_api_key_here
     ```
 
-## Running the Agents
+### Running the Application
 
-Run the main script to start the agent simulation and demo tasks:
+To run the FastAPI server, execute the main script:
 
 ```bash
-python main.py
+uv run main.py
 ```
 
-The script will:
+This will start the server, making the agents available via the ADK's web interface and API endpoints.
 
-1. Connect to the public MQTT broker (`broker.emqx.io`).
-2. Initialize the Manager, Dev, and Ops agents.
-3. Execute a series of demo queries, publishing state updates for each step.
+## Development Conventions
 
-## MQTT Communication
-
-The agents publish JSON events to the following topic pattern:
-`voffice/agents/{agent_id}/events`
-
-### Event Payload Structure
-
-```json
-{
-  "agent_id": "mgr_agent",
-  "status": "thinking",
-  "message": "Wait... I'm thinking...",
-  "timestamp": 1741512345.678
-}
-```
-
-### Status Types
-
-* `thinking`: The agent has sent a request to the LLM.
-* `acting`: The agent is executing a tool.
-* `idle`: The agent has completed its turn.
+* **Agent Definitions**: All agent personas, tools, and configurations are defined in `root_agent/agent.py`. When adding new tools or agents, place them here.
+* **Event Driven**: Any new agent or tool should have the standard callbacks (`before_model_callback`, `after_agent_callback`, `before_tool_callback`) attached to ensure its state is properly synced over MQTT.
+* **Configuration**: Global constants (like MQTT broker details, model names, and application IDs) are centralized in `config.py`.
+* **Entry Point**: The main entry point is `main.py`, which sets up and runs the FastAPI application.
